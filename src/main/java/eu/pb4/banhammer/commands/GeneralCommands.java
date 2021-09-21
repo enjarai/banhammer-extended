@@ -8,11 +8,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import eu.pb4.banhammer.BanHammerMod;
 import eu.pb4.banhammer.Helpers;
 import eu.pb4.banhammer.config.ConfigManager;
+import eu.pb4.banhammer.types.BHPlayerData;
 import eu.pb4.banhammer.types.PunishmentTypes;
 import eu.pb4.banhammer.types.SeenEntry;
 import eu.pb4.placeholders.PlaceholderAPI;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
@@ -56,25 +58,45 @@ public class GeneralCommands {
         }
 
     private static int seenCommand(CommandContext<ServerCommandSource> context) {
-        try {
-            SeenEntry entry = BanHammerMod.getSeenEntry(context.getSource().getPlayer().getUuid());
+        String playerNameOrIp = context.getArgument("player", String.class);
+        BHPlayerData player = Helpers.lookupPlayerDataNoPunishment(playerNameOrIp);
 
+        if (player == null) {
+            context.getSource().sendFeedback(new LiteralText("Invalid Player"), false);
+            return 1;
+        }
+
+        Text message;
+        if (BanHammerMod.SERVER.getPlayerManager().getPlayer(player.uuid) == null) {
+            SeenEntry entry = BanHammerMod.getSeenEntry(player.uuid);
+
+            if (entry == null) {
+                message = new LiteralText("That player has never been online");
+            } else {
+                HashMap<String, Text> placeholders = new HashMap<>();
+
+                placeholders.put("player", new LiteralText(entry.name));
+                placeholders.put("uuid", new LiteralText(entry.uuid.toString()));
+                placeholders.put("ip", new LiteralText(entry.ip));
+                placeholders.put("x", new LiteralText(String.valueOf((int) entry.coords.x)));
+                placeholders.put("y", new LiteralText(String.valueOf((int) entry.coords.y)));
+                placeholders.put("z", new LiteralText(String.valueOf((int) entry.coords.z)));
+                placeholders.put("time", new LiteralText(Helpers.getFormattedDuration(entry.time)));
+
+                message = PlaceholderAPI.parsePredefinedText(ConfigManager.getConfig().seenChatMessage,
+                        PlaceholderAPI.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
+            }
+        } else {
             HashMap<String, Text> placeholders = new HashMap<>();
 
-            placeholders.put("player", new LiteralText(entry.name));
-            placeholders.put("uuid", new LiteralText(entry.uuid.toString()));
-            placeholders.put("ip", new LiteralText(entry.ip));
-            placeholders.put("x", new LiteralText(String.valueOf((int) entry.coords.x)));
-            placeholders.put("y", new LiteralText(String.valueOf((int) entry.coords.y)));
-            placeholders.put("z", new LiteralText(String.valueOf((int) entry.coords.z)));
-            placeholders.put("time", new LiteralText(Helpers.getFormattedDuration(entry.time)));
+            placeholders.put("player", new LiteralText(player.name));
+            placeholders.put("uuid", new LiteralText(player.uuid.toString()));
+            placeholders.put("ip", new LiteralText(player.ip));
 
-            Text message = PlaceholderAPI.parsePredefinedText(ConfigManager.getConfig().seenChatMessage,
+            message = PlaceholderAPI.parsePredefinedText(ConfigManager.getConfig().seenChatMessageOnline,
                     PlaceholderAPI.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
-            context.getSource().sendFeedback(message, false);
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
         }
+        context.getSource().sendFeedback(message, false);
 
         return 1;
     }

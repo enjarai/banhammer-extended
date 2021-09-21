@@ -151,6 +151,9 @@ public abstract class AbstractSQLDatabase implements DatabaseHandlerInterface {
         try {
             String query = "SELECT * FROM seen WHERE UUID='" + uuid + "' ORDER BY id DESC LIMIT 1;";
             ResultSet result = stat.executeQuery(query);
+
+            if (!result.next()) { return null; }
+
             UUID uuid1 = UUID.fromString(result.getString("UUID"));
             String ip = result.getString("IP");
             String name = result.getString("Name");

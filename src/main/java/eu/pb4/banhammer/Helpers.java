@@ -152,6 +152,55 @@ public class Helpers {
         }
         return new BHPlayerData(uuid, name, ip, displayName, player);
     }
+
+    public static BHPlayerData lookupPlayerDataNoPunishment(String usernameOrIp) {
+        ServerPlayerEntity player = BanHammerMod.SERVER.getPlayerManager().getPlayer(usernameOrIp);
+
+        String name;
+        Text displayName;
+        UUID uuid = null;
+        String ip = null;
+
+
+        if (player != null) {
+            uuid = player.getUuid();
+            ip = player.getIp();
+            displayName = player.getDisplayName();
+            name = player.getGameProfile().getName();
+        } else if (InetAddresses.isInetAddress(usernameOrIp)) {
+            GameProfile profile = null;
+
+            for (Map.Entry<String, String> entry : BanHammerMod.IP_CACHE.entrySet()) {
+                if (entry.getValue().equals(usernameOrIp)) {
+                    uuid = UUID.fromString(entry.getKey());
+                    ip = entry.getValue();
+                    profile = BanHammerMod.SERVER.getUserCache().getByUuid(uuid).orElse(null);
+                    break;
+                }
+            }
+
+            if (profile == null) {
+                name = "Unknown player";
+                displayName = new LiteralText("Unknown player").formatted(Formatting.ITALIC);
+                uuid = Util.NIL_UUID;
+            } else {
+                displayName = new LiteralText(profile.getName());
+                name = profile.getName();
+            }
+        } else {
+            GameProfile profile = BanHammerMod.SERVER.getUserCache().findByName(usernameOrIp).orElse(null);;
+
+            if (profile != null) {
+                uuid = profile.getId();
+                ip = BanHammerMod.IP_CACHE.get(uuid.toString());
+                displayName = new LiteralText(profile.getName());
+                name = profile.getName();
+            } else {
+                return null;
+            }
+        }
+        return new BHPlayerData(uuid, name, ip, displayName, player);
+    }
 }
 
 

@@ -48,6 +48,7 @@ public class Config {
     public final Text kickScreenMessage;
 
     public final Text seenChatMessage;
+    public final Text seenChatMessageOnline;
 
     public final Text kickChatMessage;
     public final ConfigData configData;
@@ -94,6 +95,7 @@ public class Config {
         this.pardonChatMessage = toSingleString(mData.pardonChatMessage);
 
         this.seenChatMessage = toSingleString(mData.seenChatMessage);
+        this.seenChatMessageOnline = toSingleString(mData.seenChatMessageOnline);
 
         long dur = Helpers.parseDuration(data.defaultTempPunishmentDurationLimit);
 
