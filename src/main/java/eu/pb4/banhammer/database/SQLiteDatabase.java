@@ -30,4 +30,10 @@ public class SQLiteDatabase extends AbstractSQLDatabase {
         return "CREATE TABLE IF NOT EXISTS seen (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "UUID varchar(36), IP varchar(15), Name varchar(64), time BIGINT, x BIGINT, y BIGINT, z BIGINT)";
     }
+
+    @Override
+    protected String getReportsTableCreation() {
+        return "CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "UUID varchar(36), time BIGINT, description varchar(128), x BIGINT, y BIGINT, z BIGINT, open BOOLEAN NOT NULL CHECK (open IN (0, 1)) DEFAULT 1)";
+    }
 }

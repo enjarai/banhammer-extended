@@ -9,12 +9,10 @@ import eu.pb4.banhammer.BanHammerMod;
 import eu.pb4.banhammer.Helpers;
 import eu.pb4.banhammer.config.ConfigManager;
 import eu.pb4.banhammer.types.BHPlayerData;
-import eu.pb4.banhammer.types.PunishmentTypes;
 import eu.pb4.banhammer.types.SeenEntry;
 import eu.pb4.placeholders.PlaceholderAPI;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
@@ -23,6 +21,7 @@ import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.UUID;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -30,28 +29,47 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class GeneralCommands {
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(
-                    literal("banhammer")
-                            .requires(Permissions.require("banhammer.commands.main", true))
-                            .executes(GeneralCommands::about)
-                            .then(literal("reload")
-                                    .requires(Permissions.require("banhammer.commands.reload", 4))
-                                    .executes(GeneralCommands::reloadConfig)
-                            )
-                            .then(literal("import")
-                                    .requires(Permissions.require("banhammer.commands.import", 4))
-                                    .then(importArgument("source")
+            dispatcher.register(literal("banhammer")
+                    .requires(Permissions.require("banhammer.commands.main", 4))
+                    .executes(GeneralCommands::about)
+                    .then(literal("reload")
+                            .requires(Permissions.require("banhammer.commands.reload", 4))
+                            .executes(GeneralCommands::reloadConfig)
+                    )
+                    .then(literal("import")
+                            .requires(Permissions.require("banhammer.commands.import", 4))
+                            .then(importArgument("source")
+                                    .executes(GeneralCommands::importer)
+                                    .then(CommandManager.argument("remove", BoolArgumentType.bool())
                                             .executes(GeneralCommands::importer)
-                                            .then(CommandManager.argument("remove", BoolArgumentType.bool())
-                                                    .executes(GeneralCommands::importer)
-                                            )
                                     )
                             )
-                );
+                    )
+            );
             dispatcher.register(literal("seen")
-                    .requires(Permissions.require("banhammer.seen", 3))
+                    .requires(Permissions.require("banhammer.commands.seen", 3))
                     .then(playerArgument("player")
                             .executes(GeneralCommands::seenCommand)
+                    )
+            );
+            dispatcher.register(literal("report")
+                    .requires(Permissions.require("banhammer.commands.report", true))
+                    .then(argument("description", StringArgumentType.greedyString())
+                            .executes(GeneralCommands::makeReportCommand)
+                    )
+            );
+            dispatcher.register(literal("reports")
+                    .requires(Permissions.require("banhammer.commands.reports", 3))
+                    //.executes(GeneralCommands::listReportsCommand) TODO
+                    .then(literal("list")
+                            .requires(Permissions.require("banhammer.commands.reports", 3))
+                            //.executes(GeneralCommands::listReportsCommand) TODO
+                    )
+                    .then(literal("close")
+                            .requires(Permissions.require("banhammer.commands.reports.close", 3))
+                            .then(importArgument("id")
+                                    //.executes(GeneralCommands::closeReportCommand) TODO
+                            )
                     )
             );
             });
@@ -98,6 +116,29 @@ public class GeneralCommands {
         }
         context.getSource().sendFeedback(message, false);
 
+        return 1;
+    }
+
+    private static int makeReportCommand(CommandContext<ServerCommandSource> context) {
+        UUID uuid;
+        String description = context.getArgument("description", String.class);
+
+        try {
+            uuid = context.getSource().getPlayer().getUuid();
+        } catch (CommandSyntaxException e) {
+            context.getSource().sendFeedback(new LiteralText("This command has to be run by a player."), false);
+            return 1;
+        }
+
+        Text message;
+        if (BanHammerMod.CONFIRMER.ifConfirmedOrConfirm(uuid, description)) {
+            //TODO
+            message = new LiteralText("TODO report made" + description);
+        } else {
+            message = new LiteralText("TODO repeat command");
+        }
+
+        context.getSource().sendFeedback(message, false);
         return 1;
     }
 

@@ -4,6 +4,7 @@ package eu.pb4.banhammer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import eu.pb4.banhammer.commands.ConfirmationHandler;
 import eu.pb4.banhammer.commands.GeneralCommands;
 import eu.pb4.banhammer.commands.PunishCommands;
 import eu.pb4.banhammer.commands.UnpunishCommands;
@@ -52,6 +53,8 @@ public class BanHammerMod implements ModInitializer {
 	public static ConcurrentHashMap<String, String> IP_CACHE = null;
 
 	public static HashMap<String, PunishmentImporter> IMPORTERS = new HashMap<>();
+
+	public static ConfirmationHandler CONFIRMER = new ConfirmationHandler();
 
 	private static void onServerStarting(MinecraftServer server) {
 		SERVER = server;

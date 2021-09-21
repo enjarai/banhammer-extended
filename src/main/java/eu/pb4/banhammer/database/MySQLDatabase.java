@@ -29,4 +29,9 @@ public class MySQLDatabase extends AbstractSQLDatabase {
     protected String getSeenTableCreation() {
         return null;
     }
+
+    @Override
+    protected String getReportsTableCreation() {
+        return null;
+    }
 }

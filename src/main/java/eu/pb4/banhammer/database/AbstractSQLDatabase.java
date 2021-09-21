@@ -1,13 +1,7 @@
 package eu.pb4.banhammer.database;
 
 import com.google.common.net.InetAddresses;
-import eu.pb4.banhammer.types.BasicPunishment;
-import eu.pb4.banhammer.types.PunishmentTypes;
-import eu.pb4.banhammer.types.SeenEntry;
-import eu.pb4.banhammer.types.SyncedPunishment;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
+import eu.pb4.banhammer.types.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 
@@ -25,17 +19,20 @@ public abstract class AbstractSQLDatabase implements DatabaseHandlerInterface {
     protected abstract String getTableCreation();
     protected abstract String getHistoryTableCreation();
     protected abstract String getSeenTableCreation();
+    protected abstract String getReportsTableCreation();
 
     public void createTables() throws SQLException  {
         String create = this.getTableCreation();
         String createHistory = this.getHistoryTableCreation();
         String createSeen = this.getSeenTableCreation();
+        String createReports = this.getReportsTableCreation();
 
         stat.execute(String.format(create, PunishmentTypes.BAN.databaseName));
         stat.execute(String.format(create, PunishmentTypes.IPBAN.databaseName));
         stat.execute(String.format(create, PunishmentTypes.MUTE.databaseName));
         stat.execute(createHistory);
         stat.execute(createSeen);
+        stat.execute(createReports);
     }
 
     public boolean insertPunishmentIntoHistory(BasicPunishment punishment) {
@@ -108,6 +105,42 @@ public abstract class AbstractSQLDatabase implements DatabaseHandlerInterface {
         return true;
     }
 
+    public boolean insertReport(Report report) {
+        try {
+            PreparedStatement prepStmt = conn.prepareStatement(
+                    "insert into reports values (NULL, ?, ?, ?, ?, ?, ?, ?);");
+            prepStmt.setString(1, report.uuid.toString());
+            prepStmt.setString(2, String.valueOf(report.time));
+            prepStmt.setString(3, report.description);
+            prepStmt.setString(4, String.valueOf(report.x));
+            prepStmt.setString(5, String.valueOf(report.y));
+            prepStmt.setString(6, String.valueOf(report.z));
+            prepStmt.setString(7, report.open ? "1" : "0");
+
+            prepStmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean closeReport(Report report) {
+        try {
+            PreparedStatement prepStmt = conn.prepareStatement(
+                    "UPDATE reports SET open = 0 WHERE id = ?;");
+            prepStmt.setString(1, String.valueOf(report.id));
+
+            prepStmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public List<SyncedPunishment> getPunishments(String id, PunishmentTypes type) {
         List<SyncedPunishment> list = new LinkedList<>();
@@ -170,6 +203,41 @@ public abstract class AbstractSQLDatabase implements DatabaseHandlerInterface {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public List<Report> getOpenReports() {
+        List<Report> list = new LinkedList<>();
+        try {
+            String query = "SELECT * FROM reports WHERE open = 1;";
+            ResultSet result = stat.executeQuery(query);
+            int id;
+            UUID uuid;
+            long time;
+            String description;
+            long x;
+            long y;
+            long z;
+            boolean open;
+
+
+            while(result.next()) {
+                id = result.getInt("id");
+                uuid = UUID.fromString(result.getString("uuid"));
+                time = result.getLong("time");
+                description = result.getString("description");
+                x = result.getLong("x");
+                y = result.getLong("y");
+                z = result.getLong("z");
+                open = result.getBoolean("open");
+
+                list.add(new Report(id, uuid, time, description, x, y, z, open));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return list;
     }
 
     @Override

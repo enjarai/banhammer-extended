@@ -61,7 +61,7 @@ public class MessageConfigData {
     public List<String> seenChatMessage = Arrays.asList("<bold><yellow>Last seen:</yellow></bold>",
             "${player} <red>(${uuid})</red>",
             "<gray>Last IP: </gray><yellow>${ip}</yellow>",
-            "<gray>Position: </gray><yellow>${x}, ${y}, ${z}</yellow>",
+            "<gray>Position: </gray><yellow><hover:'Click to teleport'><run_cmd:'/tp ${x} ${y} ${z}'>[${x}, ${y}, ${z}]</run_cmd></hover></yellow>",
             "<gray>${time} ago</gray>");
 
     public List<String> seenChatMessageOnline = Arrays.asList("<bold><yellow>Online:</yellow></bold>",
