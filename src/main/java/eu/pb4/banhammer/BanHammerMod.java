@@ -17,6 +17,7 @@ import eu.pb4.banhammer.database.SQLiteDatabase;
 import eu.pb4.banhammer.imports.VanillaImport;
 import eu.pb4.banhammer.types.BasicPunishment;
 import eu.pb4.banhammer.types.PunishmentTypes;
+import eu.pb4.banhammer.types.SeenEntry;
 import eu.pb4.banhammer.types.SyncedPunishment;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.api.ModInitializer;
@@ -35,10 +36,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -212,6 +210,14 @@ public class BanHammerMod implements ModInitializer {
 
 	public static int removePunishment(String id, PunishmentTypes type) {
 		return DATABASE.removePunishment(id, type);
+	}
+
+	public static boolean addSeenEntry(SeenEntry entry) {
+		return DATABASE.insertSeenEntry(entry);
+	}
+
+	public static SeenEntry getSeenEntry(UUID uuid) {
+		return DATABASE.getLatestSeen(uuid);
 	}
 
 	public static List<SyncedPunishment> getPlayersPunishments(String id, PunishmentTypes type) {

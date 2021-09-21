@@ -58,6 +58,11 @@ public class MessageConfigData {
             "<gray>Reason: </gray><yellow>${reason}</yellow>",
             "<gray>By: </gray><yellow>${operator}</yellow>");
 
+    public List<String> seenChatMessage = Arrays.asList("${player} <green>(${uuid})</green>",
+            "<gray>Last IP: </gray><yellow>${ip}</yellow>",
+            "<gray>Position: </gray><yellow>${x}, ${y}, ${z}</yellow>",
+            "<gray>${time} ago</gray>");
+
     public List<String> mutedText = Collections.singletonList("<red>You are muted by ${operator}. Reason: ${reason}</red>");
     public List<String> tempMutedText = Collections.singletonList("<red>You are muted for ${expiration_time} by ${operator}. Reason: ${reason}</red>");
 

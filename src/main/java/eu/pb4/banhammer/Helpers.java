@@ -2,6 +2,8 @@ package eu.pb4.banhammer;
 
 import com.google.common.net.InetAddresses;
 import com.mojang.authlib.GameProfile;
+import eu.pb4.banhammer.config.ConfigManager;
+import eu.pb4.banhammer.config.data.MessageConfigData;
 import eu.pb4.banhammer.types.BHPlayerData;
 import eu.pb4.banhammer.types.BasicPunishment;
 import eu.pb4.banhammer.types.PunishmentTypes;
@@ -15,6 +17,41 @@ import java.net.SocketAddress;
 import java.util.*;
 
 public class Helpers {
+    public static String getFormattedDuration(long time) {
+        if (time > -1) {
+            long x = System.currentTimeMillis() / 1000 - time;
+
+            MessageConfigData data = ConfigManager.getConfig().messageConfigData;
+
+            long seconds = x % 60;
+            long minutes = (x / 60) % 60;
+            long hours = (x / (60 * 60)) % 24;
+            long days = x / (60 * 60 * 24) % 365;
+            long years = x / (60 * 60 * 24 * 365);
+
+            StringBuilder builder = new StringBuilder();
+
+            if (years > 0) {
+                builder.append(years).append(data.yearsText);
+            }
+            if (days > 0) {
+                builder.append(days).append(data.daysText);
+            }
+            if (hours > 0) {
+                builder.append(hours).append(data.hoursText);
+            }
+            if (minutes > 0) {
+                builder.append(minutes).append(data.minutesText);
+            }
+            if (seconds > 0) {
+                builder.append(seconds).append(data.secondsText);
+            }
+            return builder.toString();
+        } else {
+            return "The Future";
+        }
+    }
+
     public static String stringifyAddress(SocketAddress socketAddress) {
         String string = socketAddress.toString();
         if (string.contains("/")) {

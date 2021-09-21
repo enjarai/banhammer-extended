@@ -47,6 +47,8 @@ public class Config {
 
     public final Text kickScreenMessage;
 
+    public final Text seenChatMessage;
+
     public final Text kickChatMessage;
     public final ConfigData configData;
     private final Map<String, Long> tempDurationLimit = new HashMap<>();
@@ -90,6 +92,8 @@ public class Config {
         this.ipUnbanChatMessage = toSingleString(mData.ipUnbanChatMessage);
         this.unmuteChatMessage = toSingleString(mData.unmuteChatMessage);
         this.pardonChatMessage = toSingleString(mData.pardonChatMessage);
+
+        this.seenChatMessage = toSingleString(mData.seenChatMessage);
 
         long dur = Helpers.parseDuration(data.defaultTempPunishmentDurationLimit);
 

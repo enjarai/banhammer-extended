@@ -3,8 +3,13 @@ package eu.pb4.banhammer.database;
 import com.google.common.net.InetAddresses;
 import eu.pb4.banhammer.types.BasicPunishment;
 import eu.pb4.banhammer.types.PunishmentTypes;
+import eu.pb4.banhammer.types.SeenEntry;
 import eu.pb4.banhammer.types.SyncedPunishment;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -19,15 +24,18 @@ public abstract class AbstractSQLDatabase implements DatabaseHandlerInterface {
 
     protected abstract String getTableCreation();
     protected abstract String getHistoryTableCreation();
+    protected abstract String getSeenTableCreation();
 
     public void createTables() throws SQLException  {
         String create = this.getTableCreation();
         String createHistory = this.getHistoryTableCreation();
+        String createSeen = this.getSeenTableCreation();
 
         stat.execute(String.format(create, PunishmentTypes.BAN.databaseName));
         stat.execute(String.format(create, PunishmentTypes.IPBAN.databaseName));
         stat.execute(String.format(create, PunishmentTypes.MUTE.databaseName));
         stat.execute(createHistory);
+        stat.execute(createSeen);
     }
 
     public boolean insertPunishmentIntoHistory(BasicPunishment punishment) {
@@ -79,6 +87,27 @@ public abstract class AbstractSQLDatabase implements DatabaseHandlerInterface {
         return true;
     }
 
+    public boolean insertSeenEntry(SeenEntry entry) {
+        try {
+            PreparedStatement prepStmt = conn.prepareStatement(
+                    "insert into seen values (NULL, ?, ?, ?, ?, ?, ?, ?);");
+            prepStmt.setString(1, entry.uuid.toString());
+            prepStmt.setString(2, entry.ip);
+            prepStmt.setString(3, entry.name.toString());
+            prepStmt.setString(4, String.valueOf(entry.time));
+            prepStmt.setString(5, String.valueOf((long) entry.coords.x));
+            prepStmt.setString(6, String.valueOf((long) entry.coords.y));
+            prepStmt.setString(7, String.valueOf((long) entry.coords.z));
+
+            prepStmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public List<SyncedPunishment> getPunishments(String id, PunishmentTypes type) {
         List<SyncedPunishment> list = new LinkedList<>();
@@ -115,6 +144,29 @@ public abstract class AbstractSQLDatabase implements DatabaseHandlerInterface {
             return null;
         }
         return list;
+    }
+
+    @Override
+    public SeenEntry getLatestSeen(UUID uuid) {
+        try {
+            String query = "SELECT * FROM seen WHERE UUID='" + uuid + "' ORDER BY id DESC LIMIT 1;";
+            ResultSet result = stat.executeQuery(query);
+            UUID uuid1 = UUID.fromString(result.getString("UUID"));
+            String ip = result.getString("IP");
+            String name = result.getString("Name");
+            long time = result.getLong("time");
+            long x = result.getLong("x");
+            long y = result.getLong("y");
+            long z = result.getLong("z");
+            Vec3d coords = new Vec3d((double) x, (double) y, (double) z);
+
+            SeenEntry entry = new SeenEntry(uuid1, ip, name, time, coords);
+
+            return entry;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

@@ -4,8 +4,10 @@ import com.mojang.authlib.GameProfile;
 import eu.pb4.banhammer.BanHammerMod;
 import eu.pb4.banhammer.Helpers;
 import eu.pb4.banhammer.config.ConfigManager;
+import eu.pb4.banhammer.database.AbstractSQLDatabase;
 import eu.pb4.banhammer.types.BasicPunishment;
 import eu.pb4.banhammer.types.PunishmentTypes;
+import eu.pb4.banhammer.types.SeenEntry;
 import eu.pb4.banhammer.types.SyncedPunishment;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
@@ -29,6 +31,19 @@ public class PlayerManagerMixin {
         if (connection != null && connection.getAddress() != null) {
             BanHammerMod.IP_CACHE.put(player.getUuid().toString(), Helpers.stringifyAddress(connection.getAddress()));
         }
+    }
+
+    @Inject(method = "remove", at = @At("HEAD"))
+    private void addToSeen(ServerPlayerEntity player, CallbackInfo ci) {
+        SeenEntry entry = new SeenEntry(
+                player.getUuid(),
+                player.getIp(),
+                player.getEntityName(),
+                System.currentTimeMillis() / 1000,
+                player.getPos()
+        );
+
+        BanHammerMod.addSeenEntry(entry);
     }
 
     @Inject(method = "checkCanJoin", at = @At("TAIL"), cancellable = true)

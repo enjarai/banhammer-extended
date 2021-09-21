@@ -4,17 +4,25 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import eu.pb4.banhammer.BanHammerMod;
 import eu.pb4.banhammer.Helpers;
 import eu.pb4.banhammer.config.ConfigManager;
+import eu.pb4.banhammer.types.PunishmentTypes;
+import eu.pb4.banhammer.types.SeenEntry;
+import eu.pb4.placeholders.PlaceholderAPI;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+
+import java.util.HashMap;
 import java.util.Locale;
 
+import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class GeneralCommands {
@@ -38,8 +46,38 @@ public class GeneralCommands {
                                     )
                             )
                 );
+            dispatcher.register(literal("seen")
+                    .requires(Permissions.require("banhammer.seen", 3))
+                    .then(playerArgument("player")
+                            .executes(GeneralCommands::seenCommand)
+                    )
+            );
             });
         }
+
+    private static int seenCommand(CommandContext<ServerCommandSource> context) {
+        try {
+            SeenEntry entry = BanHammerMod.getSeenEntry(context.getSource().getPlayer().getUuid());
+
+            HashMap<String, Text> placeholders = new HashMap<>();
+
+            placeholders.put("player", new LiteralText(entry.name));
+            placeholders.put("uuid", new LiteralText(entry.uuid.toString()));
+            placeholders.put("ip", new LiteralText(entry.ip));
+            placeholders.put("x", new LiteralText(String.valueOf((int) entry.coords.x)));
+            placeholders.put("y", new LiteralText(String.valueOf((int) entry.coords.y)));
+            placeholders.put("z", new LiteralText(String.valueOf((int) entry.coords.z)));
+            placeholders.put("time", new LiteralText(Helpers.getFormattedDuration(entry.time)));
+
+            Text message = PlaceholderAPI.parsePredefinedText(ConfigManager.getConfig().seenChatMessage,
+                    PlaceholderAPI.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
+            context.getSource().sendFeedback(message, false);
+        } catch (CommandSyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return 1;
+    }
 
     private static int reloadConfig(CommandContext<ServerCommandSource> context) {
         if (ConfigManager.loadConfig()) {
@@ -94,6 +132,21 @@ public class GeneralCommands {
                     for (String type : BanHammerMod.IMPORTERS.keySet()) {
                         if (type.contains(remaining)) {
                             builder.suggest(type);
+                        }
+                    }
+
+                    return builder.buildFuture();
+                });
+    }
+
+    public static RequiredArgumentBuilder<ServerCommandSource, String> playerArgument(String name) {
+        return CommandManager.argument(name, StringArgumentType.word())
+                .suggests((ctx, builder) -> {
+                    String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
+
+                    for (String player : ctx.getSource().getServer().getPlayerNames()) {
+                        if (player.toLowerCase(Locale.ROOT).contains(remaining)) {
+                            builder.suggest(player);
                         }
                     }
 
