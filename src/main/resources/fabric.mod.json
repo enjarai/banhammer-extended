@@ -6,11 +6,12 @@
   "name": "BanHammer",
   "description": "Simple, customisable punishment utility mod for Fabric",
   "authors": [
-    "Patbox"
+    "Patbox",
+    "enjarai"
   ],
   "contact": {
-    "homepage": "https://pb4.eu",
-    "sources": "https://github.com/Patbox/BanHammer"
+    "homepage": "https://enjarai.nl",
+    "sources": "https://gitlab.com/enjarai/banhammer-extended"
   },
 
   "license": "LGPLv3",
@@ -18,7 +19,7 @@
   "environment": "server",
   "entrypoints": {
     "main": [
-      "eu.pb4.banhammer.BanHammerMod"
+      "nl.enjarai.banhammer.BanHammerMod"
     ]
   },
   "mixins": [
