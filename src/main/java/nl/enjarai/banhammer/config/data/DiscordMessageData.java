@@ -132,8 +132,19 @@ public class DiscordMessageData {
             )
     );
 
+    public boolean sendWarnMessage = true;
+    public Message warnMessage = new Message(
+            "orange",
+            List.of(
+                    "${banned} has been warned!",
+                    "",
+                    "**Reason**: ${reason}",
+                    "**By**: ${operator}"
+            )
+    );
+
     public static class Message {
-        public boolean embed = true;
+        public boolean embed = false;
         public List<String> message = Collections.emptyList();
         public String avatar = "";
         public String name = "";

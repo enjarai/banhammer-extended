@@ -208,6 +208,7 @@ public class Helpers {
             case "ipban" -> PunishmentTypes.IPBAN;
             case "mute" -> PunishmentTypes.MUTE;
             case "kick" -> PunishmentTypes.KICK;
+            case "warn" -> PunishmentTypes.WARN;
             default -> null;
         };
     }

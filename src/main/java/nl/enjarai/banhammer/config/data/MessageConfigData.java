@@ -27,6 +27,9 @@ public class MessageConfigData {
     public List<String> kickChatMessage = Arrays.asList("Player <red>${banned}</red> has been kicked by <gold>${operator}</gold>!",
             "Reason: <yellow>${reason}</yellow>");
 
+    public List<String> warnChatMessage = Arrays.asList("Player <red>${banned}</red> has been warned by <gold>${operator}</gold>!",
+            "Reason: <yellow>${reason}</yellow>");
+
     public List<String> unbanChatMessage = Collections.singletonList("Player <red>${banned}</red> has been unbanned by <gold>${operator}</gold>!");
 
     public List<String> ipUnbanChatMessage = Collections.singletonList("Player <red>${banned}</red> has been unbanned by <gold>${operator}</gold>!");

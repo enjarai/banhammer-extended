@@ -97,6 +97,15 @@ public class PunishCommands {
                                             .executes(ctx -> punishCommand(ctx,true, PunishmentTypes.IPBAN))
                             ))
                     ));
+
+            dispatcher.register(literal("warn")
+                    .requires(ConfigManager.requirePermissionOrOp("banhammer.punish.warn"))
+                    .then(playerArgument("player")
+                            .executes(ctx -> punishCommand(ctx, false, PunishmentTypes.WARN))
+                            .then(argument("reason", StringArgumentType.greedyString())
+                                    .executes(ctx -> punishCommand(ctx, false, PunishmentTypes.WARN))
+                            )
+                    ));
         });
     }
 

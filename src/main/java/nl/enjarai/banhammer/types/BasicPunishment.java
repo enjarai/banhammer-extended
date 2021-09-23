@@ -103,6 +103,7 @@ public class BasicPunishment {
             case BAN -> this.isTemporary() ? ConfigManager.getConfig().tempBanChatMessage : ConfigManager.getConfig().banChatMessage;
             case IPBAN -> this.isTemporary() ? ConfigManager.getConfig().tempIpBanChatMessage : ConfigManager.getConfig().ipBanChatMessage;
             case MUTE -> this.isTemporary() ? ConfigManager.getConfig().tempMuteChatMessage : ConfigManager.getConfig().muteChatMessage;
+            case WARN -> ConfigManager.getConfig().warnChatMessage;
         };
 
         return PlaceholderAPI.parsePredefinedText(message, PlaceholderAPI.PREDEFINED_PLACEHOLDER_PATTERN, this.getPlaceholders());
@@ -140,6 +141,9 @@ public class BasicPunishment {
                 } else if (data.sendMuteMessage) {
                     message = data.muteMessage;
                 }
+                break;
+            case WARN:
+                message = data.sendWarnMessage ? data.warnMessage : null;
                 break;
         }
 

@@ -8,7 +8,8 @@ public enum PunishmentTypes {
     BAN("ban", true, false, "bans", new LiteralText("Ban").formatted(Formatting.RED)),
     IPBAN("ipban",true, true, "ipbans", new LiteralText("IP-Ban").formatted(Formatting.DARK_RED)),
     MUTE("mute",false, false, "mutes", new LiteralText("Mute").formatted(Formatting.YELLOW)),
-    KICK("kick", true, false, null, new LiteralText("Kick").formatted(Formatting.GREEN));
+    KICK("kick", true, false, null, new LiteralText("Kick").formatted(Formatting.GREEN)),
+    WARN("warn",false, false, null, new LiteralText("Warn").formatted(Formatting.GOLD));
 
 
     public final boolean ipBased;

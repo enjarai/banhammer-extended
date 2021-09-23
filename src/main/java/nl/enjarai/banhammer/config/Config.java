@@ -38,6 +38,7 @@ public class Config {
     public final Text tempIpBanChatMessage;
     public final Text muteChatMessage;
     public final Text tempMuteChatMessage;
+    public final Text warnChatMessage;
 
     public final Text banScreenMessage;
     public final Text tempBanScreenMessage;
@@ -84,6 +85,7 @@ public class Config {
         this.neverExpires = mData.neverExpiresText;
         this.banChatMessage = toSingleString(mData.banChatMessage);
         this.tempBanChatMessage = toSingleString(mData.tempBanChatMessage);
+        this.warnChatMessage = toSingleString(mData.warnChatMessage);
 
         this.ipBanChatMessage = toSingleString(mData.ipBanChatMessage);
         this.tempIpBanChatMessage = toSingleString(mData.tempIpBanChatMessage);

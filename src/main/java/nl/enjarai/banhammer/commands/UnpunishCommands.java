@@ -153,7 +153,7 @@ public class UnpunishCommands {
                             case BAN -> data.sendUnbanMessage ? data.unbanMessage : null;
                             case IPBAN -> data.sendUnbanIpMessage ? data.unBanIpMessage : null;
                             case MUTE -> data.sendUnmuteMessage ? data.unmuteMessage : null;
-                            case KICK -> null;
+                            case KICK, WARN -> null;
                         };
                     } else {
                         tempMessage = data.sendPardonMessage ? data.pardonMessage : null;
